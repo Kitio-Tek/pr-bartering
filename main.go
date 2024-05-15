@@ -73,7 +73,7 @@ func main() {
 		peersconnect.ListenPeersRequestsTCP(port, NodeStorage, bytesAtPeers, scores, ratiosAtPeers, ratiosForPeers, bytesForPeers, &storedForPeers, config.BarteringFactorAcceptableRatio, &deletionQueue, &msgCounter)
 	}()
 
-	wg.Add(1)
+	wg.Add(1)   
 	go func() {
 		// STORAGE TESTING - to test storage at peers
 		defer wg.Done()
@@ -87,7 +87,8 @@ func main() {
 		fswatcher.FsWatcher("./data", scores, config.DataCopies, port, bytesAtPeers, &fulfilled_requests, config.StoragerequestsScoreDecreaseRefusedStoReq)
 	}()
 
-	// TODO : BARTERER, FAILURESIM, DATASIM
+	// TODO : BARTERER, FAILURESIM,
+	 
 
 	//wg.Add(1)
 	//go func() {
