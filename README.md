@@ -1,7 +1,6 @@
 # Bartering protocol
 
 
-
 Projet still under development
 
 ## General description
