@@ -27,6 +27,7 @@ type Config struct {
 	FailureModel                              string  `yaml:"FailureModel"`
 	NodeProfile                               string  `yaml:"NodeProfile"`
 	DataCopies                                int     `yaml:"DataCopies"`
+	ReservationDurationSec                    float64 `yaml:"ReservationDurationSec"`
 }
 
 func ConfigExtractor(path string) Config {
@@ -48,7 +49,6 @@ func ConfigExtractor(path string) Config {
 }
 
 func ConfigPrinter(conf Config) {
-
 	/*
 		To print a config object in a neat format
 		Input : config object
@@ -67,9 +67,10 @@ func ConfigPrinter(conf Config) {
 	Storage testing period in seconds : %f
 	Score decrease upon failed test in case of timeout : %f
 	Score decrease upon failed test in case of wrong answer : %f
-	Score increase upon succesful test : %f
-	Failure mode : %s
+	Score increase upon successful test : %f
+	Failure model : %s
 	Node profile : %s
+	Reservation duration in seconds : %f
 	`, conf.Port,
 		conf.DataCopies,
 		conf.TotalStorage,
@@ -83,7 +84,8 @@ func ConfigPrinter(conf Config) {
 		conf.StoragetestingFailedTestWrongAnsDecrease,
 		conf.StoragetestingPassedTestIncrease,
 		conf.FailureModel,
-		conf.NodeProfile)
+		conf.NodeProfile,
+		conf.ReservationDurationSec)
 
 	fmt.Println(toPrint)
 }

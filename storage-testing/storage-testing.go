@@ -79,10 +79,13 @@ func HandleTest(CID string, conn net.Conn) {
 	conn.Write(buffer) // INCREASE NBMSG COUNTER
 
 }
-
 func ContactPeerForTest(CID string, peer string, scores []datastructures.NodeScore, timerTimeoutSec float64, port string, DecreasingBehavior []datastructures.ScoreVariationScenario, IncreasingBehavior []datastructures.ScoreVariationScenario) bool {
     conn, err := net.Dial("tcp", peer+":"+port)
-    utils.ErrorHandler(err)
+    if err != nil {
+        fmt.Printf("Failed to connect to peer %s: %v\n", peer, err)
+        decreaseScore(peer, "failedTestTimeout", scores, DecreasingBehavior) // Reduce the score if the peer is unreachable
+        return false
+    }
     defer conn.Close()
 
     ctx, cancel := context.WithCancel(context.Background())
@@ -90,7 +93,11 @@ func ContactPeerForTest(CID string, peer string, scores []datastructures.NodeSco
 
     message := "TesRq" + CID
     _, err = io.WriteString(conn, message)
-    utils.ErrorHandler(err)
+    if err != nil {
+        fmt.Printf("Failed to send test request to peer %s: %v\n", peer, err)
+        decreaseScore(peer, "failedTestTimeout", scores, DecreasingBehavior)
+        return false
+    }
 
     responseChannel := make(chan string)
     var wg sync.WaitGroup
@@ -101,13 +108,13 @@ func ContactPeerForTest(CID string, peer string, scores []datastructures.NodeSco
     timer := time.NewTimer(time.Duration(timerTimeoutSec) * time.Second)
     defer timer.Stop()
 
-    defer wg.Wait()  // Ensures `wg.Wait()` is called before function exit
+    defer wg.Wait()
 
     select {
     case <-timer.C:
         fmt.Println("Timeout: No response received.")
         decreaseScore(peer, "failedTestTimeout", scores, DecreasingBehavior)
-        cancel() // Cancel the context to signal handleResponse
+        cancel()
         return false
     case response := <-responseChannel:
         if checkAnswer(response, CID) {
