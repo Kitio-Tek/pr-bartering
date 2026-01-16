@@ -1,6 +1,5 @@
 # Bartering protocol
 
-INSA Lyon 2023-2024
 
 Projet still under development
 
