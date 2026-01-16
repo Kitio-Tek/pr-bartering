@@ -8,12 +8,13 @@ import (
 	"math/rand"
 	"time" 
 
-	configextractor "bartering/config-extractor"
-	datastructures "bartering/data-structures"
+	configextractor "bartering/config-extractor"  //  packagename(alias) "module-name/folder-name"
+	datastructures "bartering/data-structures"     // alias name should match the package declaration inside the .go files in the folder of the package
 	fswatcher "bartering/fs-watcher"
 	"bartering/functions"
 	peersconnect "bartering/peers-connect"
 	storagetesting "bartering/storage-testing"
+	
 )
 
 var NodeStorage float64

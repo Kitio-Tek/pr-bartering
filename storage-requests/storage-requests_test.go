@@ -80,20 +80,26 @@ func TestElectStorageNodesLowAndHigh(t *testing.T) {
 	i := 0
 	score := 3.0
 	for i < 30 {
-		scores = append(scores, datastructures.NodeScore{NodeIP: "127.0.0.1", Score: score})
+		scores = append(scores, datastructures.NodeScore{
+			NodeIP: fmt.Sprintf("127.0.0.%d", i+1), 
+			Score:  score,
+		})
 		score += 0.5
 		i++
 	}
 
 	elected10 := ElectStorageNodesLowAndHigh(scores, 10)
-
-	fmt.Println(elected10)
+	fmt.Println("Elected 10 nodes (low and high):", elected10)
+	if len(elected10) != 10 {
+		t.Errorf("Expected 10 nodes, got %d", len(elected10))
+	}
 
 	elected20 := ElectStorageNodesLowAndHigh(scores, 20)
-
-	fmt.Println(elected20)
+	fmt.Println("Elected 20 nodes (low and high):", elected20)
+	if len(elected20) != 20 {
+		t.Errorf("Expected 20 nodes, got %d", len(elected20))
+	}
 }
-
 // func TestComputeDeadlineFromTimedStorageRequest(t *testing.T) {
 // 	storageRequest := datastructures.StorageRequestTimed{CID: "whatever", DurationMinutes: 3}
 // 	currentTime := time.Now()
@@ -110,13 +116,66 @@ func TestElectStorageNodes(t *testing.T) {
 	i := 0
 	score := 3.0
 	for i < 30 {
-		scores = append(scores, datastructures.NodeScore{NodeIP: "127.0.0.1", Score: score})
+		// Create unique IP addresses for each node
+		scores = append(scores, datastructures.NodeScore{
+			NodeIP: fmt.Sprintf("127.0.0.%d", i+1), 
+			Score:  score,
+		})
 		score += 0.5
 		i++
 	}
 
-	elected, _ := ElectStorageNodes(scores, 3)
+	
+	elected, err := ElectStorageNodes(scores, 10, make(map[string]bool))
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	if len(elected) != 10 {
+		t.Errorf("Expected 10 nodes, got %d", len(elected))
+	}
+	fmt.Println("Elected 10 nodes:", elected)
 
-	fmt.Println(elected)
+	
+	usedPeers := make(map[string]bool)
+	usedPeers["127.0.0.1"] = true
+	usedPeers["127.0.0.2"] = true
+	
+	elected2, err := ElectStorageNodes(scores, 10, usedPeers)
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	if len(elected2) != 10 {
+		t.Errorf("Expected 10 nodes, got %d", len(elected2))
+	}
+	for _, peer := range elected2 {
+		if usedPeers[peer] {
+			t.Errorf("Used peer %s was elected", peer)
+		}
+	}
+	fmt.Println("Elected 10 nodes (excluding used):", elected2)
 
+	_, err = ElectStorageNodes(scores, 35, make(map[string]bool))
+	if err == nil {
+		t.Errorf("Expected error when asking for more nodes than available")
+	}
+
+
+	manyUsedPeers := make(map[string]bool)
+	for i := 0; i < 25; i++ {
+		manyUsedPeers[fmt.Sprintf("127.0.0.%d", i+1)] = true
+	}
+	_, err = ElectStorageNodes(scores, 10, manyUsedPeers)
+	if err == nil {
+		t.Errorf("Expected error when not enough peers available after exclusions")
+	}
+
+	allElected, err := ElectStorageNodes(scores, 30, make(map[string]bool))
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	if len(allElected) != 30 {
+		t.Errorf("Expected 30 nodes, got %d", len(allElected))
+	}
+	fmt.Println("All 30 nodes elected successfully")
 }
+
