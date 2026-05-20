@@ -409,7 +409,7 @@ func GarbageCollectionStrategy(storageDeletionQueue []datastructures.StorageRequ
 	/*
 		Garbage collection strategy
 		Essentially, we might not want our node to directly deleted expired requests
-		(for example, only delete when no more storage is available to increase availabilty of data)
+		(for example, only delete when no more storage is available to increase availability of data)
 		Strategy should be defined in this function
 		Arguments : storageDeletionQueue (slice of StorageRequestTimedAccepted objects)
 	*/

@@ -195,7 +195,7 @@ func calculateMaxAcceptableRatio(peer string, scores []datastructures.NodeScore,
 	/*
 		Function to calculate the maximum acceptable ratio given a peer's score
 		Arguments : IP of peer as string, peer scores as NodeScore object list
-		Return : max acceptabel ratio as float64
+		Return : max acceptable ratio as float64
 	*/
 
 	peerScore, err := findPeerScore(peer, scores)

@@ -6,7 +6,7 @@ package metriccollector
 // time to confirm storage
 
 // Architecture : nodes collect metrics and "publish" results on an HTTP endpoint
-// Data can be retrieved through Prometheus but also through any other way throught the HTTP endpoint
+// Data can be retrieved through Prometheus but also through any other way through the HTTP endpoint
 
 func IncreaseCounter(counter *int) {
 	*counter += 1

@@ -90,7 +90,7 @@ func initiateScores(peers []string, initialScore float64) []datastructures.NodeS
 func initiateRatios(peers []string, initialRatio float64) []datastructures.NodeRatio {
 
 	/*
-		Funciton to initiate array of bartering.Noderatio objects
+		Function to initiate array of bartering.NodeRatio objects
 		Arguments : list of peers, initiat ratio value
 		Output : bartering.NodeRatio array
 	*/

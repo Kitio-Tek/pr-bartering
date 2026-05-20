@@ -69,7 +69,7 @@ func RequestTest(CID string, filesAtPeers []datastructures.FilesAtPeers, scores 
 func HandleTest(CID string, conn net.Conn) {
 
 	/*
-		Function to perform tests upon recieving a test request
+		Function to perform tests upon receiving a test request
 		Arguments : CID as a string, connection as net.Conn
 	*/
 
@@ -272,7 +272,7 @@ func checkAnswer(answer string, CID string) bool {
 
 	/*
 		Check if the received answer to a test is valid
-		Arguments : answer recieved as a string, CID of the file to test a string
+		Arguments : answer received as a string, CID of the file to test a string
 	*/
 
 	expectedAnswer := computeExpectedAnswer(CID)
