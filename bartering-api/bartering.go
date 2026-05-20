@@ -157,17 +157,6 @@ func shouldRatioBeAccepted(ratio float64, peer string, storageSpace float64, byt
 	return (isRatioTolerableGivenStorageSpace(peer, ratio, storageSpace, bytesAtPeers) && (ratio < calculateMaxAcceptableRatio(peer, scores, storageSpace, bytesAtPeers, factorAcceptableRatio)))
 }
 
-func shouldResponseRatioBeAccepted(ratio float64) bool {
-
-	/*
-		Function to decide whether the counter barter made by the other peer should be accepted or not
-		Arguments : the proposed ratio as float64
-		Returns : boolean
-	*/
-
-	return true
-}
-
 func isRatioTolerableGivenStorageSpace(peer string, ratio float64, storageSpace float64, bytesAtPeers []datastructures.PeerStorageUse) bool {
 
 	/*
@@ -261,46 +250,4 @@ func contactNodeForBarter(peer string, msg string, port string, msgCounter *int)
 	utils.ErrorHandler(err)
 
 	return responseString
-}
-
-func InitNodeScores(peers []string, initScore float64) []datastructures.NodeScore {
-
-	/*
-		Function to initiate node scores
-	*/
-
-	scores := []datastructures.NodeScore{}
-
-	for _, peer := range peers {
-		score := datastructures.NodeScore{NodeIP: peer, Score: initScore}
-		scores = append(scores, score)
-	}
-
-	return scores
-}
-
-func dealWithRefusedRequest(storageRequest datastructures.StorageRequest, nodeTotalStorageSpace int) {
-
-	/*
-		Function to deal with a refused storage request
-		In our case for now we will consider that if the storage is refused,
-		then the tolerance needs to go up
-	*/
-
-	// fileSize := storageRequest.FileSize
-
-	// delta := fileSize / float64(nodeTotalStorageSpace)
-
-	// increaseTolerance(delta)
-
-}
-
-func craftNewRq(storageRequest datastructures.StorageRequest) datastructures.StorageRequest {
-
-	/*
-		Function to craft a new better suited request aftet it was refused
-	*/
-
-	return datastructures.StorageRequest{}
-
 }

@@ -3,13 +3,9 @@ package functions
 import (
 	"fmt"
 
-	api_ipfs "bartering/api-ipfs"
+	bootstrapconnect "bartering/bootstrap-connect"
 	configextractor "bartering/config-extractor"
 	datastructures "bartering/data-structures"
-
-	bootstrapconnect "bartering/bootstrap-connect"
-
-	"bartering/utils"
 )
 
 func NodeStartup(bootstrapIp string) ([]string, []datastructures.StorageRequest, []datastructures.FulfilledRequest, []string, []datastructures.PeerStorageUse, []datastructures.PeerStorageUse, []datastructures.NodeScore, []datastructures.NodeRatio, []datastructures.NodeRatio, []datastructures.FulfilledRequest) {
@@ -106,34 +102,6 @@ func initiateRatios(peers []string, initialRatio float64) []datastructures.NodeR
 	return ratios
 }
 
-func Store(path string, storage_pool []string, pending_requests []datastructures.StorageRequest) {
-
-	/*
-		UNFINISHED
-		Function called when a new file needs to be stored on the network
-		This function will :
-			- add the file to IPFS, pin it and get its CID
-			- retrieve the file's size and build a StorageRequest data object with the CID and the file's size
-			- add the storage requests to the pendingRequests list
-	*/
-
-	CID := api_ipfs.UploadToIPFS(path)
-
-	storage_pool = append(storage_pool, CID)
-
-	fmt.Println(storage_pool)
-
-	file_size := utils.GetFileSize(path)
-
-	fmt.Println(file_size)
-
-	storage_request := datastructures.StorageRequest{CID: CID, FileSize: file_size}
-
-	pending_requests = append(pending_requests, storage_request)
-
-	fmt.Println("Pending requests : ", pending_requests)
-}
-
 func createStorageRequestsLists() ([]string, []datastructures.StorageRequest, []datastructures.StorageRequest) {
 
 	/*
@@ -151,12 +119,3 @@ func createStorageRequestsLists() ([]string, []datastructures.StorageRequest, []
 	return storage_pool, pending_requests, fulfilled_requests
 
 }
-
-// func propagateToPeers(storageRequest datastructures.StorageRequest) {
-// 	messageToPropagate := storagerequests.BuildStorageRequestMessage(storageRequest)
-// 	fmt.Println(messageToPropagate)
-
-// 	// Choose peers to propagate to
-// 	// send request, await accept ?
-// 	// If refuse or no answer, make better offer ?
-// }
