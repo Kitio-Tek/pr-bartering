@@ -1,0 +1,35 @@
+# Compiled binaries and build output
+/bartering
+/bootstrap
+/main
+bin/
+dist/
+*.exe
+*.test
+*.out
+
+# Go workspace and module cache artifacts
+/vendor/
+go.work
+go.work.sum
+
+# Coverage and profiling output
+coverage.out
+coverage.txt
+*.prof
+*.pprof
+
+# Editor and OS metadata
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+
+# Agent and local tooling state
+.claude/
+.cline/
+.gemini/
+
+# Local IPFS test fixtures and scratch data
+/docker_test_bench
