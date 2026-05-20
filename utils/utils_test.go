@@ -15,7 +15,7 @@ func TestListPrint(t *testing.T) {
 
 	ListPrint(list)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = originalStdout
 
 	capturedOutput, _ := io.ReadAll(r)

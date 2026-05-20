@@ -239,7 +239,7 @@ func contactNodeForBarter(peer string, msg string, port string, msgCounter *int)
 	conn, err := net.Dial("tcp", peer+":"+port)
 	utils.ErrorHandler(err)
 
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	_, err = io.WriteString(conn, msg)
 	*msgCounter += 1 // INCREASE NBMSG COUNTER

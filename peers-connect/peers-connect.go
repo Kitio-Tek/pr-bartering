@@ -23,7 +23,7 @@ func ListenPeersRequestsTCP(port string, nodeStorage float64, bytesAtPeers []dat
 		utils.ErrorHandler(err)
 		return
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 
 	// Create a channel to limit the number of concurrent connections
 	connLimiter := make(chan struct{}, maxConnections)
@@ -39,13 +39,13 @@ func ListenPeersRequestsTCP(port string, nodeStorage float64, bytesAtPeers []dat
 		go func(conn net.Conn) {
 			defer func() {
 				<-connLimiter // Release the slot
-				conn.Close()
+				_ = conn.Close()
 			}()
 
 			// Set TCP keep-alive
 			if tcpConn, ok := conn.(*net.TCPConn); ok {
-				tcpConn.SetKeepAlive(true)
-				tcpConn.SetKeepAlivePeriod(3 * time.Minute) // Keep-alive period
+				_ = tcpConn.SetKeepAlive(true)
+				_ = tcpConn.SetKeepAlivePeriod(3 * time.Minute) // Keep-alive period
 			}
 
 			handleConnection(conn, nodeStorage, bytesAtPeers, scores, ratiosAtPeers, bytesForPeers, storedForPeers, factorAcceptableRatio, deletienQueue, msgCounter)
@@ -60,11 +60,13 @@ func handleConnection(conn net.Conn, nodeStorage float64, bytesAtPeers []datastr
 		Arguments : a connection as net.Conn
 	*/
 
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	buffer := make([]byte, 63)
 
-	conn.Read(buffer)
+	if _, err := conn.Read(buffer); err != nil {
+		return
+	}
 
 	MessageDiscriminator(buffer, conn, nodeStorage, bytesAtPeers, scores, ratios, bytesForPeers, storedForPeers, factorAcceptableRatio, deletionQueue, msgCounter)
 
@@ -80,29 +82,24 @@ func MessageDiscriminator(buffer []byte, conn net.Conn, nodeStorage float64, byt
 	bufferString := string(buffer)
 	messageType := bufferString[:5]
 
-	if messageType == "StoRq" {
-
+	switch messageType {
+	case "StoRq":
 		storagerequests.HandleStorageRequest(bufferString, conn, bytesForPeers, storedForPeers)
-		// storagerequests.HandleStorageRequestTimed(bufferString, conn, bytesAtPeers, storedForPeers, deletionQueue)
 
-	} else if messageType == "BarRq" {
-
+	case "BarRq":
 		remoteAddr := conn.RemoteAddr()
 		ip, _, err := net.SplitHostPort(remoteAddr.String())
 		utils.ErrorHandler(err)
 		fmt.Println("Received bartering request from peer", ip)
 		bartering.RespondToBarterMsg(bufferString, ip, nodeStorage, bytesAtPeers, scores, conn, ratios, factorAcceptableRatio, msgCounter)
 
-	} else if messageType == "TesRq" {
-
-		fmt.Println("Recieved test request")
+	case "TesRq":
+		fmt.Println("Received test request")
 		CID := bufferString[5 : len(bufferString)-1]
 		fmt.Println(CID)
 		storagetesting.HandleTest(CID, conn)
 
-	} else {
-
+	default:
 		fmt.Println("Unrecognized message : ", bufferString)
-
 	}
 }

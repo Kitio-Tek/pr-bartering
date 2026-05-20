@@ -17,37 +17,37 @@ import (
 func StoreKCopiesOnNetwork(peerScores []datastructures.NodeScore, K int, storageRequest datastructures.StorageRequest, port string, bytesAtPeers []datastructures.PeerStorageUse, fulfilledRequests *[]datastructures.FulfilledRequest, scoreDecreaseRefStoReq float64) int {
 
 	okRqs := 0
-    usedPeers := make(map[string]bool)
-    tries := 0
+	usedPeers := make(map[string]bool)
+	tries := 0
 
-    for tries < 3 {
-        peersToRequest, err := ElectStorageNodes(peerScores, K, usedPeers)
-        if err != nil {
-            fmt.Println(err)
-            return 0
-        }
+	for tries < 3 {
+		peersToRequest, err := ElectStorageNodes(peerScores, K, usedPeers)
+		if err != nil {
+			fmt.Println(err)
+			return 0
+		}
 
-        for _, peer := range peersToRequest {
-            if usedPeers[peer] {
-                continue
-            }
-            response := RequestStorageFromPeer(peer, storageRequest, port, bytesAtPeers, peerScores, fulfilledRequests, scoreDecreaseRefStoReq)
-            if response == "OK\n" {
-                okRqs++
-				fmt.Printf("The value of counter is %d.\n ",okRqs)
-                usedPeers[peer] = true
-                if okRqs == K {
-                    fmt.Println("Reached required number of copies")
-                    return okRqs
-                }
-            }
-        }
-        fmt.Println("Could not reach number of copies ... choosing new nodes")
-        tries++
-    }
+		for _, peer := range peersToRequest {
+			if usedPeers[peer] {
+				continue
+			}
+			response := RequestStorageFromPeer(peer, storageRequest, port, bytesAtPeers, peerScores, fulfilledRequests, scoreDecreaseRefStoReq)
+			if response == "OK\n" {
+				okRqs++
+				fmt.Printf("The value of counter is %d.\n ", okRqs)
+				usedPeers[peer] = true
+				if okRqs == K {
+					fmt.Println("Reached required number of copies")
+					return okRqs
+				}
+			}
+		}
+		fmt.Println("Could not reach number of copies ... choosing new nodes")
+		tries++
+	}
 
-    fmt.Println("Could not reach desired number of copies - only got ", okRqs)
-    return okRqs
+	fmt.Println("Could not reach desired number of copies - only got ", okRqs)
+	return okRqs
 
 }
 
@@ -115,43 +115,44 @@ func updateFulfilledRequests(CID string, peer string, fulfilledRequests *[]datas
 }
 
 func RequestStorageFromPeer(peer string, storageRequest datastructures.StorageRequest, port string, bytesAtPeers []datastructures.PeerStorageUse, scores []datastructures.NodeScore, fulfilledRequests *[]datastructures.FulfilledRequest, scoreDecreaseRefStoReq float64) string {
-    fmt.Println("Requesting storage from peer:", peer)
+	fmt.Println("Requesting storage from peer:", peer)
 
-    storageRqMessage := BuildStorageRequestMessage(storageRequest)
+	storageRqMessage := BuildStorageRequestMessage(storageRequest)
 
-    conn, err := net.Dial("tcp", peer+":"+port)
-    if err != nil {
-        fmt.Printf("Failed to connect to peer %s: %v\n", peer, err)
-        return "Failed to connect"
-    }
-    defer conn.Close()
+	conn, err := net.Dial("tcp", peer+":"+port)
+	if err != nil {
+		fmt.Printf("Failed to connect to peer %s: %v\n", peer, err)
+		return "Failed to connect"
+	}
+	defer func() { _ = conn.Close() }()
 
-    _, err = io.WriteString(conn, storageRqMessage)
-    if err != nil {
-        fmt.Printf("Failed to send storage request to peer %s: %v\n", peer, err)
-        return "Failed to send"
-    }
+	_, err = io.WriteString(conn, storageRqMessage)
+	if err != nil {
+		fmt.Printf("Failed to send storage request to peer %s: %v\n", peer, err)
+		return "Failed to send"
+	}
 
-    response, err := bufio.NewReader(conn).ReadString('\n')
-    if err != nil {
-        fmt.Printf("Failed to read response from peer %s: %v\n", peer, err)
-        return "Failed to read"
-    }
+	response, err := bufio.NewReader(conn).ReadString('\n')
+	if err != nil {
+		fmt.Printf("Failed to read response from peer %s: %v\n", peer, err)
+		return "Failed to read"
+	}
 
-    fmt.Println("Response from peer:", response)
+	fmt.Println("Response from peer:", response)
 
-    if response == "OK\n" {
-        fmt.Printf("Peer %s stored file with CID %s successfully.\n", peer, storageRequest.CID)
-        updateBytesAtPeers(bytesAtPeers, peer, storageRequest)
-        updateFulfilledRequests(storageRequest.CID, peer, fulfilledRequests)
-        return "OK\n"
-    } else if response == "KO\n" {
-        fmt.Printf("Storage request refused by peer %s, decreasing score.\n", peer)
-        updatePeerScoreRefusedRq(scores, peer, scoreDecreaseRefStoReq)
-        return "KO\n"
-    }
+	switch response {
+	case "OK\n":
+		fmt.Printf("Peer %s stored file with CID %s successfully.\n", peer, storageRequest.CID)
+		updateBytesAtPeers(bytesAtPeers, peer, storageRequest)
+		updateFulfilledRequests(storageRequest.CID, peer, fulfilledRequests)
+		return "OK\n"
+	case "KO\n":
+		fmt.Printf("Storage request refused by peer %s, decreasing score.\n", peer)
+		updatePeerScoreRefusedRq(scores, peer, scoreDecreaseRefStoReq)
+		return "KO\n"
+	}
 
-    return "Unknown response"
+	return "Unknown response"
 }
 
 func updatePeerScoreRefusedRq(scores []datastructures.NodeScore, peer string, scoreDecreaseRefStoReq float64) {
@@ -296,24 +297,24 @@ func CheckRqValidityTimed(storageRequest datastructures.StorageRequestTimed) boo
 }
 
 func ElectStorageNodes(peerScores []datastructures.NodeScore, numberOfNodes int, usedPeers map[string]bool) ([]string, error) {
-    if numberOfNodes > len(peerScores) {
-        return nil, errors.New("asking for more peers than we have available")
-    }
+	if numberOfNodes > len(peerScores) {
+		return nil, errors.New("asking for more peers than we have available")
+	}
 
-    var electedNodes []string
-    for _, peerScore := range peerScores {
-        if len(electedNodes) >= numberOfNodes {
-            break
-        }
-        if !usedPeers[peerScore.NodeIP] {
-            electedNodes = append(electedNodes, peerScore.NodeIP)
-        }
-    }
+	var electedNodes []string
+	for _, peerScore := range peerScores {
+		if len(electedNodes) >= numberOfNodes {
+			break
+		}
+		if !usedPeers[peerScore.NodeIP] {
+			electedNodes = append(electedNodes, peerScore.NodeIP)
+		}
+	}
 
-    if len(electedNodes) < numberOfNodes {
-        return nil, fmt.Errorf("not enough available peers to satisfy the request")
-    }
-    return electedNodes, nil
+	if len(electedNodes) < numberOfNodes {
+		return nil, fmt.Errorf("not enough available peers to satisfy the request")
+	}
+	return electedNodes, nil
 }
 
 func ElectStorageNodesLowAndHigh(peerScores []datastructures.NodeScore, numberOfNodes int) []datastructures.NodeScore {

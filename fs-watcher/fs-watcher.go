@@ -24,7 +24,7 @@ func FsWatcher(path string, peerScores []datastructures.NodeScore, K int, port s
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer watcher.Close()
+	defer func() { _ = watcher.Close() }()
 
 	done := make(chan bool)
 

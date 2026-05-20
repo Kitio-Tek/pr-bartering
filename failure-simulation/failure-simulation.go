@@ -19,11 +19,12 @@ func ExtractFailureModel(config configextractor.Config) (func(float64, float64) 
 		(failure model is the probability law for session length)
 	*/
 
-	if config.FailureModel == "weibull" {
+	switch config.FailureModel {
+	case "weibull":
 		return DrawNumberWeibull, nil
-	} else if config.FailureModel == "lognormal" {
+	case "lognormal":
 		return DrawNumberLognormal, nil
-	} else {
+	default:
 		return func(float64, float64) float64 { return 0.0 }, errors.New("failure model not recognized")
 	}
 }
@@ -35,13 +36,14 @@ func ExtractConnectivityFactor(config configextractor.Config) (float64, error) {
 		(node profile defines proportion of time where node is up or down)
 	*/
 
-	if config.NodeProfile == "peer" {
+	switch config.NodeProfile {
+	case "peer":
 		return 0.5, nil
-	} else if config.NodeProfile == "benefactor" {
+	case "benefactor":
 		return 0.7, nil
-	} else if config.NodeProfile == "peeper" {
+	case "peeper":
 		return 0.3, nil
-	} else {
+	default:
 		return 0.0, errors.New("node profile not recognized ; should be benefactor, peer or peeper")
 	}
 }

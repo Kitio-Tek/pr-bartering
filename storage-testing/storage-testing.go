@@ -74,9 +74,11 @@ func HandleTest(CID string, conn net.Conn) {
 	*/
 
 	answer := computeExpectedAnswer(CID)
-	fmt.Println("Proof computed : ", answer)
+	fmt.Printf("Proof computed : %x\n", answer)
 	buffer := []byte(answer)
-	conn.Write(buffer) // INCREASE NBMSG COUNTER
+	if _, err := conn.Write(buffer); err != nil { // INCREASE NBMSG COUNTER
+		fmt.Println("Error writing test proof:", err)
+	}
 
 }
 func ContactPeerForTest(CID string, peer string, scores []datastructures.NodeScore, timerTimeoutSec float64, port string, DecreasingBehavior []datastructures.ScoreVariationScenario, IncreasingBehavior []datastructures.ScoreVariationScenario) bool {
@@ -86,7 +88,7 @@ func ContactPeerForTest(CID string, peer string, scores []datastructures.NodeSco
 		decreaseScore(peer, "failedTestTimeout", scores, DecreasingBehavior) // Reduce the score if the peer is unreachable
 		return false
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
