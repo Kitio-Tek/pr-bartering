@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a defect in the bartering protocol or its tooling.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to file a report. Please fill in the sections below.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: A clear description of the problem, including any error output or log lines.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: What you expected to happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can a maintainer reproduce this? Include the node setup and config used.
+      placeholder: |
+        1. Start the bootstrap with ...
+        2. Launch a node with ...
+        3. Add a file to data/ ...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Output of `go version`, your OS, and the IPFS (Kubo) version.
+    validations:
+      required: true

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "labels": ["dependencies"],
+  "automerge": false,
+  "packageRules": [
+    {
+      "description": "Never auto-merge. Dependency updates are reviewed and merged by a maintainer.",
+      "matchPackageNames": ["*"],
+      "automerge": false
+    },
+    {
+      "description": "Group Go module updates into a single pull request.",
+      "matchManagers": ["gomod"],
+      "groupName": "go modules"
+    }
+  ]
+}
