@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Go](https://img.shields.io/badge/go-1.26-00ADD8.svg)](go.mod)
 
-pr-bartering is an experimental overlay on top of [IPFS](https://ipfs.tech) that
+pr-bartering is an overlay on top of [IPFS](https://ipfs.tech) that
 lets a set of nodes replicate each other's data by bartering storage. Instead of
 paying for pinning with a cryptocurrency, as services such as Filecoin do, each
 node trades space: it stores data for its peers in exchange for them storing its
