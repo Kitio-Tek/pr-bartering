@@ -3,13 +3,22 @@ package functions
 import (
 	datastructures "bartering/data-structures"
 	"bartering/utils"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
 func TestGetFileSize(t *testing.T) {
-	result := utils.GetFileSize("../test-data/test.txt")
-	if result != 0.0126953125 {
-		t.Errorf("Expected 0.0126953125, but got %f", result)
+	// A 13-byte file should report as 13/1024 KB.
+	path := filepath.Join(t.TempDir(), "fixture.txt")
+	if err := os.WriteFile(path, []byte("hello, world!"), 0o600); err != nil {
+		t.Fatalf("could not write fixture: %v", err)
+	}
+
+	result := utils.GetFileSize(path)
+	expected := 13.0 / 1024.0
+	if result != expected {
+		t.Errorf("Expected %v, but got %v", expected, result)
 	}
 }
 

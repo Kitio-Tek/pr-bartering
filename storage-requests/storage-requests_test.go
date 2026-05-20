@@ -9,17 +9,17 @@ import (
 
 func TestAuxInsertInSortedList(t *testing.T) {
 
+	now := time.Now()
 	queue := []datastructures.StorageRequestTimedAccepted{}
-	storageRequestFirst := datastructures.StorageRequestTimedAccepted{CID: "blablablafirst", Deadline: time.Now()}
+	storageRequestFirst := datastructures.StorageRequestTimedAccepted{CID: "blablablafirst", Deadline: now}
 
 	i := 0
 	for i < 3 {
-		storageRequest := datastructures.StorageRequestTimedAccepted{CID: "blablabla" + fmt.Sprint(i), Deadline: time.Now()}
+		storageRequest := datastructures.StorageRequestTimedAccepted{CID: "blablabla" + fmt.Sprint(i), Deadline: now.Add(time.Duration(i+1) * time.Second)}
 		queue = append(queue, storageRequest)
 		i += 1
 	}
-	time.Sleep(5 * time.Second)
-	storageRequestLast := datastructures.StorageRequestTimedAccepted{CID: "blablablalast", Deadline: time.Now()}
+	storageRequestLast := datastructures.StorageRequestTimedAccepted{CID: "blablablalast", Deadline: now.Add(time.Hour)}
 
 	newQueue := AuxInsertInSortedList(storageRequestFirst, queue)
 	newNewQueue := AuxInsertInSortedList(storageRequestLast, newQueue)
@@ -31,22 +31,19 @@ func TestAuxInsertInSortedList(t *testing.T) {
 }
 
 func TestAppendStorageRequestToDeletionQueue(t *testing.T) {
+	now := time.Now()
 	queue := []datastructures.StorageRequestTimedAccepted{}
-	storageRequestFirst := datastructures.StorageRequestTimedAccepted{CID: "blablablafirst", Deadline: time.Now()}
+	storageRequestFirst := datastructures.StorageRequestTimedAccepted{CID: "blablablafirst", Deadline: now}
 	i := 0
 	for i < 3 {
-		storageRequest := datastructures.StorageRequestTimedAccepted{CID: "blablabla" + fmt.Sprint(i), Deadline: time.Now()}
+		storageRequest := datastructures.StorageRequestTimedAccepted{CID: "blablabla" + fmt.Sprint(i), Deadline: now.Add(time.Duration(i+1) * time.Second)}
 		queue = append(queue, storageRequest)
 		i += 1
 	}
-	fmt.Println(queue)
-	time.Sleep(5 * time.Second)
-	storageRequestLast := datastructures.StorageRequestTimedAccepted{CID: "blablablalast", Deadline: time.Now()}
+	storageRequestLast := datastructures.StorageRequestTimedAccepted{CID: "blablablalast", Deadline: now.Add(time.Hour)}
 
 	AppendStorageRequestToDeletionQueue(storageRequestFirst, &queue)
 	AppendStorageRequestToDeletionQueue(storageRequestLast, &queue)
-
-	fmt.Println(queue)
 
 	if queue[0] != storageRequestFirst || queue[len(queue)-1] != storageRequestLast {
 		t.Errorf("timed storage requests not inserted correctly into deletion queue")
@@ -81,7 +78,7 @@ func TestElectStorageNodesLowAndHigh(t *testing.T) {
 	score := 3.0
 	for i < 30 {
 		scores = append(scores, datastructures.NodeScore{
-			NodeIP: fmt.Sprintf("127.0.0.%d", i+1), 
+			NodeIP: fmt.Sprintf("127.0.0.%d", i+1),
 			Score:  score,
 		})
 		score += 0.5
@@ -100,6 +97,7 @@ func TestElectStorageNodesLowAndHigh(t *testing.T) {
 		t.Errorf("Expected 20 nodes, got %d", len(elected20))
 	}
 }
+
 // func TestComputeDeadlineFromTimedStorageRequest(t *testing.T) {
 // 	storageRequest := datastructures.StorageRequestTimed{CID: "whatever", DurationMinutes: 3}
 // 	currentTime := time.Now()
@@ -118,14 +116,13 @@ func TestElectStorageNodes(t *testing.T) {
 	for i < 30 {
 		// Create unique IP addresses for each node
 		scores = append(scores, datastructures.NodeScore{
-			NodeIP: fmt.Sprintf("127.0.0.%d", i+1), 
+			NodeIP: fmt.Sprintf("127.0.0.%d", i+1),
 			Score:  score,
 		})
 		score += 0.5
 		i++
 	}
 
-	
 	elected, err := ElectStorageNodes(scores, 10, make(map[string]bool))
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
@@ -135,11 +132,10 @@ func TestElectStorageNodes(t *testing.T) {
 	}
 	fmt.Println("Elected 10 nodes:", elected)
 
-	
 	usedPeers := make(map[string]bool)
 	usedPeers["127.0.0.1"] = true
 	usedPeers["127.0.0.2"] = true
-	
+
 	elected2, err := ElectStorageNodes(scores, 10, usedPeers)
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
@@ -159,7 +155,6 @@ func TestElectStorageNodes(t *testing.T) {
 		t.Errorf("Expected error when asking for more nodes than available")
 	}
 
-
 	manyUsedPeers := make(map[string]bool)
 	for i := 0; i < 25; i++ {
 		manyUsedPeers[fmt.Sprintf("127.0.0.%d", i+1)] = true
@@ -178,4 +173,3 @@ func TestElectStorageNodes(t *testing.T) {
 	}
 	fmt.Println("All 30 nodes elected successfully")
 }
-
