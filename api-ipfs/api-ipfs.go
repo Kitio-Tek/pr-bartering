@@ -77,7 +77,7 @@ func CatIPFS(cid string) string {
 		Returns : output of the unpin command as a string
 	*/
 	fmt.Println("Calling cat command for CID", cid)
-	cmd := "/usr/local/bin/ipfs"
+	cmd := "ipfs"
 	cmdArgs := []string{"cat", "--timeout=30s", cid}
 
 	cmdOutput, err := exec.Command(cmd, cmdArgs...).Output()

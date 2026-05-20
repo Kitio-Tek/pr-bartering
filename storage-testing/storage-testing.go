@@ -80,55 +80,54 @@ func HandleTest(CID string, conn net.Conn) {
 
 }
 func ContactPeerForTest(CID string, peer string, scores []datastructures.NodeScore, timerTimeoutSec float64, port string, DecreasingBehavior []datastructures.ScoreVariationScenario, IncreasingBehavior []datastructures.ScoreVariationScenario) bool {
-    conn, err := net.Dial("tcp", peer+":"+port)
-    if err != nil {
-        fmt.Printf("Failed to connect to peer %s: %v\n", peer, err)
-        decreaseScore(peer, "failedTestTimeout", scores, DecreasingBehavior) // Reduce the score if the peer is unreachable
-        return false
-    }
-    defer conn.Close()
+	conn, err := net.Dial("tcp", peer+":"+port)
+	if err != nil {
+		fmt.Printf("Failed to connect to peer %s: %v\n", peer, err)
+		decreaseScore(peer, "failedTestTimeout", scores, DecreasingBehavior) // Reduce the score if the peer is unreachable
+		return false
+	}
+	defer conn.Close()
 
-    ctx, cancel := context.WithCancel(context.Background())
-    defer cancel()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-    message := "TesRq" + CID
-    _, err = io.WriteString(conn, message)
-    if err != nil {
-        fmt.Printf("Failed to send test request to peer %s: %v\n", peer, err)
-        decreaseScore(peer, "failedTestTimeout", scores, DecreasingBehavior)
-        return false
-    }
+	message := "TesRq" + CID
+	_, err = io.WriteString(conn, message)
+	if err != nil {
+		fmt.Printf("Failed to send test request to peer %s: %v\n", peer, err)
+		decreaseScore(peer, "failedTestTimeout", scores, DecreasingBehavior)
+		return false
+	}
 
-    responseChannel := make(chan string)
-    var wg sync.WaitGroup
-    wg.Add(1)
+	responseChannel := make(chan string)
+	var wg sync.WaitGroup
+	wg.Add(1)
 
-    go handleResponse(ctx, &wg, responseChannel, conn)
+	go handleResponse(ctx, &wg, responseChannel, conn)
 
-    timer := time.NewTimer(time.Duration(timerTimeoutSec) * time.Second)
-    defer timer.Stop()
+	timer := time.NewTimer(time.Duration(timerTimeoutSec) * time.Second)
+	defer timer.Stop()
 
-    defer wg.Wait()
+	defer wg.Wait()
 
-    select {
-    case <-timer.C:
-        fmt.Println("Timeout: No response received.")
-        decreaseScore(peer, "failedTestTimeout", scores, DecreasingBehavior)
-        cancel()
-        return false
-    case response := <-responseChannel:
-        if checkAnswer(response, CID) {
-            fmt.Println("test passed")
-            increaseScore(peer, "passedTest", scores, IncreasingBehavior)
-            return true
-        } else {
-            fmt.Println("test not passed")
-            decreaseScore(peer, "failedTestWrongAns", scores, DecreasingBehavior)
-            return false
-        }
-    }
+	select {
+	case <-timer.C:
+		fmt.Println("Timeout: No response received.")
+		decreaseScore(peer, "failedTestTimeout", scores, DecreasingBehavior)
+		cancel()
+		return false
+	case response := <-responseChannel:
+		if checkAnswer(response, CID) {
+			fmt.Println("test passed")
+			increaseScore(peer, "passedTest", scores, IncreasingBehavior)
+			return true
+		} else {
+			fmt.Println("test not passed")
+			decreaseScore(peer, "failedTestWrongAns", scores, DecreasingBehavior)
+			return false
+		}
+	}
 }
-
 
 func handleResponse(ctx context.Context, wg *sync.WaitGroup, responseChannel chan<- string, conn net.Conn) {
 	defer wg.Done()
@@ -241,9 +240,9 @@ func decreaseScore(peer string, scenario string, scores []datastructures.NodeSco
 	decreaseAmount, err := findScoreVariation(DecreasingBehavior, scenario)
 	utils.ErrorHandler(err)
 
-	for _, peerScore := range scores {
+	for index, peerScore := range scores {
 		if peerScore.NodeIP == peer {
-			peerScore.Score -= decreaseAmount
+			scores[index].Score -= decreaseAmount
 		}
 	}
 
