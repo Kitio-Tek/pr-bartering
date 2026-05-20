@@ -37,7 +37,7 @@ func ConfigExtractor(path string) Config {
 		Input : path to the config.yaml file
 		Output : Config object
 	*/
-	file, err := os.ReadFile(path)
+	file, err := os.ReadFile(path) // #nosec G304 -- path is the operator-provided local configuration file, not attacker-controlled input
 	utils.ErrorHandler(err)
 
 	config := Config{}

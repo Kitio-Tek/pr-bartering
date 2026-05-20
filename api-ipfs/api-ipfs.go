@@ -22,7 +22,7 @@ func UploadToIPFS(path string) string {
 	cmd := "ipfs"
 	cmdArgs := []string{"add", path}
 
-	cmdOutput, err := exec.Command(cmd, cmdArgs...).Output()
+	cmdOutput, err := exec.Command(cmd, cmdArgs...).Output() // #nosec G204 -- the binary name is the constant "ipfs" and exec.Command starts it without a shell, so no command injection is possible
 
 	utils.ErrorHandler(err)
 
@@ -45,7 +45,7 @@ func PinToIPFS(cid string) string {
 	cmd := "ipfs"
 	cmdArgs := []string{"pin", "add", cid}
 
-	cmdOutput, err := exec.Command(cmd, cmdArgs...).Output()
+	cmdOutput, err := exec.Command(cmd, cmdArgs...).Output() // #nosec G204 -- the binary name is the constant "ipfs" and exec.Command starts it without a shell, so no command injection is possible
 
 	utils.ErrorHandler(err)
 
@@ -63,7 +63,7 @@ func UnpinIPFS(cid string) string {
 	cmd := "ipfs"
 	cmdArgs := []string{"pin", "rm", cid}
 
-	cmdOutput, err := exec.Command(cmd, cmdArgs...).Output()
+	cmdOutput, err := exec.Command(cmd, cmdArgs...).Output() // #nosec G204 -- the binary name is the constant "ipfs" and exec.Command starts it without a shell, so no command injection is possible
 
 	utils.ErrorHandler(err)
 
@@ -80,7 +80,7 @@ func CatIPFS(cid string) string {
 	cmd := "ipfs"
 	cmdArgs := []string{"cat", "--timeout=30s", cid}
 
-	cmdOutput, err := exec.Command(cmd, cmdArgs...).Output()
+	cmdOutput, err := exec.Command(cmd, cmdArgs...).Output() // #nosec G204 -- the binary name is the constant "ipfs" and exec.Command starts it without a shell, so no command injection is possible
 
 	utils.ErrorHandler(err)
 

@@ -1,22 +1,21 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	"bartering/utils"
-	"bufio"
-	"strings"
 )
 
 /*
 	Code for bootstrap node - here a simple HTTP server
 	On 8082, bootstrap returns a list of peers as a list of ip addresses as strings
 */
-
-
 
 func main() {
 
@@ -36,7 +35,7 @@ func main() {
 
 	// Build IP peers array
 
-	peers, err := BuildPeersIPlist("./ips.txt",address)
+	peers, err := BuildPeersIPlist("./ips.txt", address)
 
 	if err != nil {
 		fmt.Println("Error building peer IP list")
@@ -65,26 +64,36 @@ func main() {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write(jsonResponse)
+		if _, err := w.Write(jsonResponse); err != nil {
+			fmt.Println("Error writing peer list response:", err)
+		}
 
-		fmt.Println("-- PEER CONNECTION HANDLED SUCCESFULLY --")
+		fmt.Println("-- PEER CONNECTION HANDLED SUCCESSFULLY --")
 	})
 
-	err = http.ListenAndServe(serverAddress, nil)
+	server := &http.Server{
+		Addr:              serverAddress,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+
+	err = server.ListenAndServe()
 	utils.ErrorHandler(err)
 
 }
 
 func BuildPeersIPlist(path string, ownAddress string) ([]string, error) {
 
-	file, err := os.Open(path)
+	file, err := os.Open(path) // #nosec G304 -- path is the operator-provided local peer-list file, not attacker-controlled input
 
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return []string{}, err
 	}
 
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	var peers []string
 	scanner := bufio.NewScanner(file)
@@ -94,11 +103,9 @@ func BuildPeersIPlist(path string, ownAddress string) ([]string, error) {
 
 		// Remove quotes and parentheses
 		peerAddress = strings.Trim(peerAddress, "\"()")
-		
 
-		
 		peers = append(peers, peerAddress)
-		
+
 	}
 
 	if err := scanner.Err(); err != nil {

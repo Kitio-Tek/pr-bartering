@@ -1,8 +1,8 @@
 module bartering
 
-go 1.24.0
+go 1.26.0
 
-toolchain go1.24.2
+toolchain go1.26.3
 
 require (
 	github.com/fsnotify/fsnotify v1.10.1
