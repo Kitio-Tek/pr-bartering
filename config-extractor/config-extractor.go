@@ -3,9 +3,9 @@ package configextractor
 import (
 	"bartering/utils"
 	"fmt"
-	"io/ioutil"
+	"os"
 
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 /*
@@ -37,7 +37,7 @@ func ConfigExtractor(path string) Config {
 		Input : path to the config.yaml file
 		Output : Config object
 	*/
-	file, err := ioutil.ReadFile(path)
+	file, err := os.ReadFile(path)
 	utils.ErrorHandler(err)
 
 	config := Config{}

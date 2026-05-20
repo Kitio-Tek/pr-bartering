@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -18,7 +18,7 @@ func TestListPrint(t *testing.T) {
 	w.Close()
 	os.Stdout = originalStdout
 
-	capturedOutput, _ := ioutil.ReadAll(r)
+	capturedOutput, _ := io.ReadAll(r)
 
 	expected := "hello goodbye"
 

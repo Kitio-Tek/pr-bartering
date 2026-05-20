@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 
@@ -63,7 +62,7 @@ func GetPeersFromBootstrapHTTP(IP string, port string) []string {
 		panic(-1)
 	}
 
-	bootstrapResponseBody, err := ioutil.ReadAll(bootstrapResponse.Body)
+	bootstrapResponseBody, err := io.ReadAll(bootstrapResponse.Body)
 	utils.ErrorHandler(err)
 
 	var peers []string
